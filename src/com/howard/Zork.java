@@ -34,13 +34,20 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.neo4j.graphalgo.GraphAlgoFactory;
+import org.neo4j.graphalgo.PathFinder;
+import org.neo4j.graphalgo.WeightedPath;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.Expander;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.kernel.Traversal;
 import org.neo4j.visualization.PropertyType;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.visualization.graphviz.StyleParameter;
@@ -473,6 +480,44 @@ public class Zork
 					}
 				});		        
 	    		controls.add(editPanel);
+
+		        JPanel pathPanel = new JPanel();
+		        JLabel pathLabel = new JLabel( "Shortest path to:", JLabel.TRAILING);
+		        pathPanel.add( pathLabel );
+		        selectButton = new JButton("To...");
+		        selectButton.addActionListener( new ActionListener()
+		        {
+					@Override
+					public void actionPerformed( ActionEvent e )
+					{
+						selectionMode = true;
+						selectButton.setText( "Selecting..." );
+					}
+				});
+		        pathPanel.add( selectButton );
+		        JButton path = new JButton("Path");
+		        path.addActionListener( new ActionListener()
+		        {				
+					@Override
+					public void actionPerformed(ActionEvent e)
+					{
+						if ( selectedNode == null )
+							return;
+						
+						Expander expander = Traversal.expanderForAllTypes( Direction.OUTGOING );
+						PathFinder<Path> pathFinder = GraphAlgoFactory.shortestPath( expander, 10000 );
+						Path path = pathFinder.findSinglePath( fromNode, selectedNode );
+				        for ( PropertyContainer element : path )
+				        {
+				        	if ( element instanceof Node )
+				        		System.out.println( ((Node)element).getProperty( "RoomName" ) );
+				        	else
+				        		System.out.println( "-> " + ((Relationship)element).getType() + " ->" );
+				        }
+					}
+				});
+		        pathPanel.add( path );	
+		        controls.add(pathPanel,BorderLayout.LINE_START);
 
 	    		frame.getContentPane().add(controls,BorderLayout.LINE_START);
 
