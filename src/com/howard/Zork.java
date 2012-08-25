@@ -110,6 +110,7 @@ public class Zork
 	static JLabel imageLabel;
 	static boolean selectionMode = false;
 	static JButton selectButton = null;
+	private static String dotExecPath = System.getProperty("dotexec", "/usr/local/bin/dot");
 	
     private static void createAndShowGUI()
     {
@@ -702,7 +703,7 @@ public class Zork
 			GraphvizWriter writer = new GraphvizWriter( nodeTitle, propertyFilter, propertyFormat, new ScaleFormat() );
 			writer.emit( out, Walker.fullGraph( graphDb ) );
 
-    		Process processX = Runtime.getRuntime().exec( "/usr/local/bin/dot");
+    		Process processX = Runtime.getRuntime().exec( dotExecPath);
     		processX.getOutputStream().write( out.toByteArray() );
     		processX.getOutputStream().flush();
     		processX.getOutputStream().close();
@@ -714,7 +715,7 @@ public class Zork
     		while ( (num = is.read( buf )) != -1)
     			dot.write( buf, 0, num );
     		
-    		Process process = Runtime.getRuntime().exec( "/usr/local/bin/dot -Tpng");
+    		Process process = Runtime.getRuntime().exec( dotExecPath+" -Tpng");
     		process.getOutputStream().write( dot.toByteArray() );
     		process.getOutputStream().flush();
     		process.getOutputStream().close();
